@@ -29,13 +29,21 @@ client.connect(err => {
   })
 // for update data
   app.get("/product/:id",(req,res)=>{
-    productCollection.find({_id: ObjectId(req.params.id)})
+    productCollection.find({_id: ObjectId(req.params.id)},)
     .toArray ((err,documents)=>{
       res.send(documents[0]);
     })
       
     })
-  
+  app.patch("/update/:id",(req, res)=>{
+    productCollection.updateOne({_id: ObjectId(req.params.id)},
+    {
+      $set:{price : req.body.price, quantity: req.body.quantity}
+    })
+    .then(data =>{
+      res.send( data.modifiedCount>0);
+    })
+  })
 
 // insert from form to database
   app.post("/addProduct",(req,res)=>{
@@ -43,7 +51,7 @@ client.connect(err => {
     productCollection.insertOne(product)
     .then(result => {
       console.log('data added successfully');
-      res.send ('success');
+      res.redirect('/');
 
     })
     
@@ -52,7 +60,7 @@ client.connect(err => {
   app.delete("/delete/:id",(req,res)=>{
     productCollection.deleteMany({_id: ObjectId(req.params.id)})
     .then(result =>{
-      console.log(result)
+      res.send (result.deletedCount>0)
     })
   })
  

@@ -21,6 +21,9 @@
     <div class="row d-flex"id="products">
 
     </div>
+    <div id="update">
+
+    </div>
 
     <script>
 // show data
@@ -31,13 +34,14 @@
         .then(data =>{
             console.log(data);
             const container = document.getElementById('products');
+            container.innerHTML ='';
             data.forEach(element => {
                 const p= document.createElement('p');
-                p.innerHTML=`,<div style ="margin-left: 20px;">
+                p.innerHTML=`<div style ="margin-left: 20px;">
                     <strong>${element.name}</strong> == 
                 price = ${element.price} quantity = ${element.quantity}
                 <button onclick="fetchProduct('${element._id}')">Update</button> 
-                <button onclick="deleteProduct('${element._id}')"> Delete</button>
+                <button onclick="deleteProduct(event,'${element._id}')"> Delete</button>
                     </div>`;
                 container.appendChild(p);
                 
@@ -51,18 +55,44 @@
             fetch (`/product/${id}`)
             .then (res =>res.json())
             .then (data =>{
-                console.log (data);
+                const update = document.getElementById('update')
+                update.innerHTML = `<h3> Updating Product: ${data._id}</h3> 
+                price: <input type="number" id="price" value="${data.price}">
+                quantity: <input type="number" id="quantity" value="${data.quantity}">
+                <br>
+                <button onclick ="updateProduct('${data._id}')"> submit</button>
+                `
             })
         }
 
-        function deleteProduct(id){
+        function updateProduct(id){
+            const price = document.getElementById("price").value;
+            const quantity = document.getElementById("quantity").value;
+            const product = {id,price,quantity}
+            fetch (`/update/${id}`,{
+                method: 'PATCH',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(product)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data){
+                    loadProduct();
+                    document.getElementById('update').innerHTML ='';
+                }
+        })
+        }
+
+        function deleteProduct(event,id){
             console.log(id);
             fetch(`/delete/${id}`,{
                 method: 'DELETE',
             })
             .then(res =>res.json())
             .then(result =>{
-                console.log(result);
+                if(result){
+                    event.target.parentNode.style.display = 'none';
+                }
             })
         }
     </script>
